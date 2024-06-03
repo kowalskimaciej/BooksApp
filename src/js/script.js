@@ -5,6 +5,15 @@ const template = Handlebars.compile(document.querySelector('#template-book').inn
 // Add reference to book list container
 const bookListContainer = document.querySelector('.books-list');
 
+// Add empty array for favourite books
+const favouriteBooks = [];
+
+// Add an empty array for Filters
+const filters = [];
+
+// Add reference to filters container
+const filtersContainer = document.querySelector('.filters');
+
 // Add function render
 const render = function() {
 
@@ -21,10 +30,68 @@ const render = function() {
   }
 };
 
-render();
+// Add function filterBooks
+const filterBooks = function() {
 
-/// Add empty array for favourite books
-const favouriteBooks = [];
+  // Iterate through all dataSource.books elements
+  for (const book of dataSource.books) {
+
+    // Hidden flague, default false
+    let shouldBeHidden = false;
+
+    // Iterate through filters array
+    for (const filter of filters) {
+
+      // Check if book has apropriate category
+      if (!book.details[filter]) {
+
+        shouldBeHidden = true;
+
+        // Break, no need for more searching after the first finding
+        break;
+
+      }
+
+    }
+
+    // Add reference to all books HTML
+    const bookImages = bookListContainer.querySelectorAll('.book__image');
+
+    // Check if book should be hidden
+    if (shouldBeHidden) {
+
+      // Iterate through book images
+      for (let bookImg of bookImages) {
+
+        // Find apropriate book image
+        if (book.id == bookImg.getAttribute('data-id')) {
+
+          // Add class hidden
+          bookImg.classList.add('hidden');
+
+        }
+      }
+
+    } else {
+
+      // Iterate through book images
+      for (let bookImg of bookImages) {
+
+        // Find apropriate book image
+        if (book.id == bookImg.getAttribute('data-id')) {
+
+          // Add class hidden
+          bookImg.classList.remove('hidden');
+
+        }
+
+      }
+
+    }
+
+  }
+};
+
 
 const initActions = function() {
 
@@ -61,7 +128,46 @@ const initActions = function() {
 
   });
 
+  // Add click event listener to filtersContainer
+  filtersContainer.addEventListener('click', function(event) {
+  
+    // Add reference to clicked element
+    const clickedElement = event.target;
+
+    // Add reference to clicked element tagName, Type && Name
+    const tag = clickedElement.tagName;
+    const type = clickedElement.getAttribute('type');
+    const name = clickedElement.getAttribute('name');
+  
+    // Check if clicked element is input type checkbox with name filter
+    if (tag == 'INPUT' && type == 'checkbox' && name == 'filter') {
+      
+      // Check if input is checked
+      if (clickedElement.checked) {
+
+        // Add input value to filters array
+        filters.push(clickedElement.value);
+
+        filterBooks();
+
+      } else {
+
+        // Remove input value from filters array
+        const index = filters.indexOf(clickedElement.value);
+        filters.splice(index, 1);
+
+        filterBooks();
+
+      }
+
+    }
+
+  });
+
 };
+
+// Run render function
+render();
 
 // Run initActions function
 initActions();
